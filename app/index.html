@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A quick, contributor-friendly overview of project status, ownership, activity, and priority.">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="page-header">
+        <p class="eyebrow">Team overview</p>
+        <h1>Project Pulse</h1>
+        <p class="page-intro">A clear snapshot of what’s moving, who’s leading, and where contributors can help.</p>
+      </header>
+
+      <section class="project-section" aria-labelledby="projects-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Across the team</p>
+            <h2 id="projects-heading">Projects</h2>
+          </div>
+          <p class="section-note">Status, ownership, and the latest updates at a glance.</p>
+        </div>
+
+        <div id="project-state" class="state-panel" role="status" aria-live="polite">
+          <span class="loading-indicator" aria-hidden="true"></span>
+          <p>Loading project updates…</p>
+        </div>
+        <div id="project-grid" class="project-grid" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script>
+      const grid = document.querySelector("#project-grid");
+      const state = document.querySelector("#project-state");
+
+      function displayValue(value, fallback = "Not provided") {
+        return typeof value === "string" && value.trim() ? value.trim() : fallback;
+      }
+
+      function toneFor(value, options) {
+        const normalized = typeof value === "string" ? value.trim().toLowerCase().replace(/[\s_]+/g, "-") : "";
+        return options.includes(normalized) ? normalized : "neutral";
+      }
+
+      function addTextElement(parent, tagName, className, text) {
+        const element = document.createElement(tagName);
+        element.className = className;
+        element.textContent = text;
+        parent.append(element);
+        return element;
+      }
+
+      function createProjectCard(project) {
+        const card = document.createElement("article");
+        card.className = "project-card";
+
+        const header = document.createElement("header");
+        header.className = "card-header";
+        addTextElement(header, "h3", "project-name", displayValue(project.name, "Untitled project"));
+
+        const status = document.createElement("span");
+        status.className = `status-badge status-${toneFor(project.status, ["active", "on-track", "at-risk", "blocked", "planned", "completed"])}`;
+        status.textContent = `Status: ${displayValue(project.status)}`;
+        header.append(status);
+        card.append(header);
+
+        const details = document.createElement("dl");
+        details.className = "project-details";
+        [
+          ["Owner", displayValue(project.owner)],
+          ["Priority", displayValue(project.priority)]
+        ].forEach(([label, value]) => {
+          const item = document.createElement("div");
+          item.className = "detail-item";
+          addTextElement(item, "dt", "detail-label", label);
+          const detailValue = addTextElement(item, "dd", "detail-value", value);
+          if (label === "Priority") {
+            detailValue.classList.add(`priority-${toneFor(value, ["critical", "high", "medium", "low"])}`);
+          }
+          details.append(item);
+        });
+        card.append(details);
+
+        const activity = document.createElement("section");
+        activity.className = "card-section";
+        addTextElement(activity, "h4", "card-label", "Recent activity");
+        addTextElement(activity, "p", "activity-text", displayValue(project.recentActivity));
+        card.append(activity);
+
+        const summary = document.createElement("section");
+        summary.className = "card-section summary-section";
+        addTextElement(summary, "h4", "card-label", "Project summary");
+        addTextElement(summary, "p", "summary-text", displayValue(project.summary, "No summary provided yet."));
+        card.append(summary);
+        return card;
+      }
+
+      function showError() {
+        state.className = "state-panel state-error";
+        state.replaceChildren();
+        addTextElement(state, "p", "", "Project updates couldn’t be loaded. Check that the dashboard is being served over HTTP, then try again.");
+        const retry = document.createElement("button");
+        retry.className = "retry-button";
+        retry.type = "button";
+        retry.textContent = "Try again";
+        retry.addEventListener("click", loadProjects);
+        state.append(retry);
+      }
+
+      async function loadProjects() {
+        state.className = "state-panel";
+        state.replaceChildren();
+        const loading = document.createElement("span");
+        loading.className = "loading-indicator";
+        loading.setAttribute("aria-hidden", "true");
+        state.append(loading);
+        addTextElement(state, "p", "", "Loading project updates…");
+        grid.replaceChildren();
+
+        try {
+          const response = await fetch("project-data.json");
+          if (!response.ok) {
+            throw new Error(`Project data request failed (${response.status}).`);
+          }
+          const data = await response.json();
+          if (!data || !Array.isArray(data.projects)) {
+            throw new Error("Project data must contain a projects array.");
+          }
+          if (data.projects.length === 0) {
+            state.className = "state-panel state-empty";
+            state.replaceChildren();
+            addTextElement(state, "p", "", "No projects to show yet. Check back when the team adds its first project.");
+            return;
+          }
+          grid.append(...data.projects.map(createProjectCard));
+          state.className = "visually-hidden";
+          state.replaceChildren();
+        } catch (error) {
+          showError();
+          console.error("Unable to load Project Pulse data:", error);
+        }
+      }
+
+      loadProjects();
+    </script>
+  </body>
+</html>

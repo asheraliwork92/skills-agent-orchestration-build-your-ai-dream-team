@@ -1,0 +1,44 @@
+{
+  "projects": [
+    {
+      "name": "Contributor Onboarding",
+      "owner": "Mona Chen",
+      "status": "Active",
+      "recentActivity": "Published the refreshed setup guide and welcomed three first-time contributors this week.",
+      "priority": "High",
+      "summary": "Make it easier for new contributors to find a good first issue and get a local environment running."
+    },
+    {
+      "name": "Design System Refresh",
+      "owner": "Jordan Patel",
+      "status": "On track",
+      "recentActivity": "Reviewed the updated color tokens with product teams; component migration is underway.",
+      "priority": "Medium",
+      "summary": "Unify shared interface patterns and improve accessibility across the product suite."
+    },
+    {
+      "name": "API Reliability",
+      "owner": "Avery Williams",
+      "status": "At risk",
+      "recentActivity": "Load testing uncovered a queue bottleneck; the team is validating a mitigation before release.",
+      "priority": "Critical",
+      "summary": "Reduce latency spikes and make service health easier to understand during peak traffic."
+    },
+    {
+      "name": "Community Showcase",
+      "owner": "Riley Kim",
+      "status": "Planned",
+      "recentActivity": "Collected demo proposals from maintainers and drafted the event outline.",
+      "priority": "Low",
+      "summary": "Highlight useful community-built projects and give maintainers a welcoming place to share their work."
+    },
+    {
+      "name": "Documentation Search",
+      "owner": "Sam Rivera",
+      "status": "Blocked",
+      "recentActivity": "Search indexing is ready, pending access to the staging environment for end-to-end checks.",
+      "priority": "High",
+      "summary": "Help readers find answers across the handbook, API guides, and troubleshooting articles."
+    }
+  ]
+}
